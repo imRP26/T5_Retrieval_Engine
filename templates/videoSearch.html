@@ -161,39 +161,47 @@
     /* End of Footer */
     
     @media screen and (max-width: 510px) {
-        .top-toolbar nav a:nth-child(2), a:nth-child(3), footer {
-        display:none;
-        }
-    
-        .logo {
-        max-width: 40%;
-        }
+    .top-toolbar nav a:nth-child(2), a:nth-child(3), footer {
+    display:none;
     }
-</style>
+    
+    .logo {
+    max-width: 40%;
+    }
+    }
+    </style>
+    
     <div class="top-toolbar">
     <nav>
     <!--
     <a href="#">+You</a>
     <a href="#">Gmail</a>
-    <img src="https://dl.dropboxusercontent.com/u/25441638/1.5-google-clone/images/grid.png" />
-    <a href="#"><button class="signin">Sign In</button></a>
     -->
     <a href="search">Search</a>
     <a href="imageSearch">Images</a>
     <a href="newsSearch">News</a>
-    <a href="newsSearch">Videos</a>
+    <a href="videoSearch">Videos</a>
+    <!--
+    <img src="https://dl.dropboxusercontent.com/u/25441638/1.5-google-clone/images/grid.png" />
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/88/DuckDuckGo_logo.svg/1200px-DuckDuckGo_logo.svg.png" />
+    <a href="#"><button class="signin">Sign In</button></a>
+    -->
     </nav>
     </div>
     <div class="search">
     <div class="logo">
     <img src="https://upload.wikimedia.org/wikipedia/en/e/e1/International_Institute_of_Information_Technology%2C_Hyderabad_logo.png" />
     </div>
-    <form method="POST" action="search">
-    {% csrf_token %}
-    <input class="search-bar" type="text" name="search" autofocus x-webkit-speech/>
+    <form method="POST" action="videoSearch">
+            {% csrf_token %}
+    {% if query %}
+        <input class="search-bar" type="text" name="videoSearch" autofocus x-webkit-speech value={{query}} />
+    {% else %}
+        <input class="search-bar" type="text" name="videoSearch" autofocus x-webkit-speech />
+    {% endif %}
     <div class="search-nav">
     <div class="search-button">
-    <a href="#"><button type="submit">T5 Search</button></a>
+    <a href="#"><button type="submit">T5 Video Search</button></a>
     </form>
     <!--
     <a href="#"><button>I'm Feeling Lucky</button></a>
@@ -201,18 +209,18 @@
     </div>
     </div>
     </div>
-
     {% if final_result %}
-    <b style="padding-left: 50px; padding-right: 50px; color: #646464;">Web Results</b>
+    <b style="padding-left: 50px; padding-right: 50px; color: #646464;">Video Results</b>
     {% for result in final_result %}
     <div style="padding-left: 50px; padding-right: 50px;">
         <h3 style="color: blue;"><a href="{{ result.1 }}" target="blank">{{ result.0 }}</a></h3>
-        <h3 style="color: green;">{{ result.1 }}</h3>
-        <h3>{{ result.2 }}</h3>
+        <h3 style="color: green;">{{ result.2 }}</h3>
+        <h3 style="color: red;">{{ result.3 }}</h3>
+        <h3 style="color: black;">{{ result.4 }}</h3>
+        <h3 style="color: brown;">{{ result.5 }}</h3>
     </div><br><br>
     {% endfor %}
     {% endif %}
-
     <!--
     <div class="footer">
     <footer class="bottom-toolbar">
@@ -228,4 +236,3 @@
     </footer>
     </div>
     -->
-    

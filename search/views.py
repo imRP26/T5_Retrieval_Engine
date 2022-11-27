@@ -3,6 +3,7 @@ from django.shortcuts import render
 from bs4 import BeautifulSoup as bs
 from gnewsclient import gnewsclient
 from heapq import nlargest
+import lxml
 from newspaper import Article, Config
 import requests
 import spacy
@@ -159,3 +160,45 @@ def newsSearch(request):
         return render(request, 'newsSearch.html', context)
     else:
         return render(request, 'newsSearch.html')
+
+
+def videoSearch(request):
+    if request.method == 'POST':
+        headers = {
+            "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+        }
+        search = request.POST['videoSearch']
+        params = {
+            "q": search,
+            "cc": "ind" # language/country of the search
+        }
+        html = requests.get('https://www.bing.com/videos/search', params=params, headers=headers)
+        soup = bs(html.text, 'lxml')
+        final_result = []
+        for result in soup.select('.mc_vtvc.b_canvas'):
+            title = result.select_one('.b_promtxt').text
+            #link = f"https://www.bing.com{result.select_one('.mc_vtvc_link')['href']}"
+            link = result.select_one('.mc_vtvc_link')['href']
+            if link[0] == '/':
+                link = 'https://www.bing.com' + link
+            views = result.select_one('.mc_vtvc_meta_row:nth-child(1) span:nth-child(1)').text
+            date = ''
+            if result.select_one('.mc_vtvc_meta_row:nth-child(1) span+ span') == None:
+                date = '1st January, 2000'
+            else:
+                date = result.select_one('.mc_vtvc_meta_row:nth-child(1) span+ span').text
+            video_platform = result.select_one('.mc_vtvc_meta_row+ .mc_vtvc_meta_row span:nth-child(1)').text
+            channel_name = ''
+            if result.select_one('.mc_vtvc_meta_row_channel') == None:
+                channel_name = 'Youtuber'
+            else:
+                channel_name = result.select_one('.mc_vtvc_meta_row_channel').text
+            final_result.append((title, link, channel_name, video_platform, date, views))
+        final_result = sorted(final_result, key=lambda x: x[-2])
+        context = {
+            'final_result': final_result
+        }
+        return render(request, 'videoSearch.html', context)
+    else:
+        return render(request, 'videoSearch.html')
