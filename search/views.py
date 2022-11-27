@@ -1,3 +1,4 @@
+import certifi
 from django.shortcuts import render
 from bs4 import BeautifulSoup as bs
 from gnewsclient import gnewsclient
@@ -6,6 +7,7 @@ from newspaper import Article, Config
 import requests
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
+import ssl
 from string import punctuation
 
 
@@ -20,16 +22,25 @@ def search(request):
         search = request.POST['search']
         max_pages = 5
         final_result = []
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.load_verify_locations(certifi.where())
+        ssl._create_default_https_context = context
         for page in range(0,max_pages):
             url = 'https://www.ask.com/web?q=' + search + "&qo=pagination&page=" + str(page)
+            #res = requests.get(url, verify=False)
             res = requests.get(url)
             soup = bs(res.text, 'lxml')
             result_listings = soup.find_all('div', {'class': 'PartialSearchResults-item'})
+            uniqueURLs = set()
             for result in result_listings:
                 result_title = result.find(class_='PartialSearchResults-item-title').text
                 result_url = result.find('a').get('href')
                 result_desc = result.find(class_='PartialSearchResults-item-abstract').text
-                final_result.append((result_title, result_url, result_desc))
+                session = requests.Session()
+                response = session.get(result_url)
+                result_cookies = len(session.cookies.get_dict())
+                final_result.append((result_title, result_url, result_desc, result_cookies))
+        final_result = sorted(final_result, key=lambda x: x[-1])
         context = {
             'final_result': final_result
         }
