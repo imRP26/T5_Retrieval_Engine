@@ -102,7 +102,7 @@ def newsSearch(request):
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
         config = Config()
         config.browser_user_agent = userAgent
-        config.request_timeout = 10
+        config.request_timeout = 30
         newsList = client.get_news()
         final_result = []
         for news in newsList:
