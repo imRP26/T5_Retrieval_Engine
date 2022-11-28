@@ -180,6 +180,7 @@ color: #000000;
     <a href="imageSearch">Images</a>
     <a href="newsSearch">News</a>
     <a href="videoSearch">Videos</a>
+    <a href="movieSearch">Movies</a>
     <!--
     <img src="https://dl.dropboxusercontent.com/u/25441638/1.5-google-clone/images/grid.png" />
     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/88/DuckDuckGo_logo.svg/1200px-DuckDuckGo_logo.svg.png" />
@@ -194,7 +195,7 @@ color: #000000;
     <form method="POST" action="imageSearch">
             {% csrf_token %}
     {% if query %}
-        <input class="search-bar" type="text" name="imageSearch" autofocus x-webkit-speech value={{query}} />
+        <input class="search-bar" id="input-field" type="text" name="imageSearch" autofocus x-webkit-speech value={{ query }} />
     {% else %}
         <input class="search-bar" type="text" name="imageSearch" autofocus x-webkit-speech />
     {% endif %}
@@ -224,14 +225,19 @@ color: #000000;
     <div class="footer">
         <footer class="bottom-toolbar">
         <nav class="footer-left">
-        <a href="https://www.linkedin.com/">LinkedIn</a>
-        <a href="https://github.com/">Github</a>
-        <a href="https://www.instagram.com/">Instagram</a>
-        <a href="https://twitter.com/">Twitter</a>
-        <a href="https://www.reddit.com/">Reddit</a>
+        <a href="https://www.linkedin.com/" target="blank">LinkedIn</a>
+        <a href="https://github.com/" target="blank">Github</a>
+        <a href="https://www.instagram.com/" target="blank">Instagram</a>
+        <a href="https://twitter.com/" target="blank">Twitter</a>
+        <a href="https://www.reddit.com/" target="blank">Reddit</a>
         </nav>
         <nav class="footer-right">
-        <a href="https://github.com/JimHalpert26/T5_Retrieval_Engine">Source Code</a>
+        <a href="https://github.com/JimHalpert26/T5_Retrieval_Engine" target="blank">Source</a>
         </nav>
         </footer>
         </div>
+        <script type="text/javascript">
+            let input = document.getElementById("input-field");
+            let length = input.value.length;
+            input.setSelectionRange(length, length);   
+        </script>

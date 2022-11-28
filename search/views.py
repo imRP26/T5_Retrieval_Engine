@@ -5,11 +5,15 @@ from gnewsclient import gnewsclient
 from heapq import nlargest
 import lxml
 from newspaper import Article, Config
+import numpy as np
+from random import randint
 import requests
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 import ssl
 from string import punctuation
+from time import sleep
+from warnings import warn
 
 
 # Create your views here.
@@ -28,8 +32,12 @@ def search(request):
         ssl._create_default_https_context = context
         for page in range(0,max_pages):
             url = 'https://www.ask.com/web?q=' + search + "&qo=pagination&page=" + str(page)
-            #res = requests.get(url, verify=False)
-            res = requests.get(url)
+            headers = requests.utils.default_headers()
+            headers.update( {
+                'User-Agent': 
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
+            })
+            res = requests.get(url, headers=headers)
             soup = bs(res.text, 'lxml')
             result_listings = soup.find_all('div', {'class': 'PartialSearchResults-item'})
             uniqueURLs = set()
@@ -221,3 +229,56 @@ def videoSearch(request):
         return render(request, 'videoSearch.html', context)
     else:
         return render(request, 'videoSearch.html')
+
+
+def movieSearch(request):
+    if request.method == 'POST':
+        """
+        comedy, sci-fi, horror, romance, action, thirller, drama, mystery, 
+        crime, animation, adventure, fantasy, superhero
+        """
+        search = request.POST['movieSearch']
+        pages = np.arange(1, 100, 50)
+        headers = {'Accept-Language': 'en-US,en;q=0.8'}
+        final_result = []
+        for page in pages:
+            url = 'https://www.imdb.com/search/title?genres=' + search + '&start=' + str(page) + '&explore=title_type,genres&ref_=adv_prv'
+            response = requests.get(url, headers=headers)
+            #sleep(randint(8, 15))
+            if response.status_code != 200:
+                warn('Request: {}; Status code: {}'.format(requests, response.status_code))
+            page_html = bs(response.text, 'html.parser')  
+            movie_containers = page_html.find_all('div', class_ = 'lister-item mode-advanced')
+            for container in movie_containers:
+                if container.find('div', class_ = 'ratings-metascore') is not None:
+                    title = container.h3.a.text
+                    link = 'https://www.imdb.com' + container.find('a').get('href')
+                    year = None
+                    if container.h3.find('span', class_= 'lister-item-year text-muted unbold') is not None:
+                        year = container.h3.find('span', class_= 'lister-item-year text-muted unbold').text
+                    rating = None
+                    if container.p.find('span', class_ = 'certificate') is not None:            
+                        rating = container.p.find('span', class_= 'certificate').text
+                    genre = []
+                    if container.p.find('span', class_ = 'genre') is not None:
+                        genre = container.p.find('span', class_ = 'genre').text.replace("\n", "").rstrip().split(',')
+                    runtime = None
+                    if container.p.find('span', class_ = 'runtime') is not None:
+                        runtime = container.p.find('span', class_ = 'runtime').text
+                    imdb_rating = 0.0
+                    if float(container.strong.text) is not None:
+                        imdb_rating = float(container.strong.text)
+                    metascore = 0
+                    if container.find('span', class_ = 'metascore').text is not None:
+                        metascore = int(container.find('span', class_ = 'metascore').text)
+                    rankScore = imdb_rating + metascore
+                    final_result.append((title, link, year, rating, genre, runtime, rankScore))
+        final_result = sorted(final_result, key=lambda x: x[-1], reverse=True)
+        print (len(final_result))
+        context = {
+            'final_result': final_result,
+            'query': search
+        }
+        return render(request, 'movieSearch.html', context)
+    else:
+        return render(request, 'movieSearch.html')

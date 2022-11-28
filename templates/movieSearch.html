@@ -193,16 +193,16 @@
     <div class="logo">
     <img src="https://upload.wikimedia.org/wikipedia/en/e/e1/International_Institute_of_Information_Technology%2C_Hyderabad_logo.png" />
     </div>
-    <form method="POST" action="videoSearch">
+    <form method="POST" action="movieSearch">
             {% csrf_token %}
     {% if query %}
-        <input class="search-bar" id="input-field" type="text" name="videoSearch" autofocus x-webkit-speech value={{ query }} />
+        <input class="search-bar" id="input-field" type="text" name="movieSearch" autofocus x-webkit-speech value={{ query }} />
     {% else %}
-        <input class="search-bar" type="text" name="videoSearch" autofocus x-webkit-speech />
+        <input class="search-bar" type="text" name="movieSearch" autofocus x-webkit-speech />
     {% endif %}
     <div class="search-nav">
     <div class="search-button">
-    <a href="#"><button type="submit">T5 Video Search</button></a>
+    <a href="#"><button type="submit">T5 Movie Search</button></a>
     </form>
     <!--
     <a href="#"><button>I'm Feeling Lucky</button></a>
@@ -211,7 +211,7 @@
     </div>
     </div>
     {% if final_result %}
-    <b style="padding-left: 50px; padding-right: 50px; color: #646464;">Video Results</b>
+    <b style="padding-left: 50px; padding-right: 50px; color: #646464;">Movie Results</b>
     {% for result in final_result %}
     <div style="padding-left: 50px; padding-right: 50px;">
         <h3 style="color: blue;"><a href="{{ result.1 }}" target="blank">{{ result.0 }}</a></h3>
