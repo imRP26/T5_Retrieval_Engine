@@ -196,7 +196,6 @@ color: #000000;
             {% csrf_token %}
     {% if query %}
         <input class="search-bar" id="input-field" type="text" name="imageSearch" autofocus x-webkit-speech value="{{ query }}" />
-        <input class="search-bar" id="input-field" type="text" name="imageSearch" autofocus x-webkit-speech value={{ query }} />
     {% else %}
         <input class="search-bar" type="text" name="imageSearch" autofocus x-webkit-speech />
     {% endif %}

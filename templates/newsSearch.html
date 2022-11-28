@@ -196,7 +196,7 @@
     <form method="POST" action="newsSearch">
             {% csrf_token %}
     {% if query %}
-        <input class="search-bar" id="input-field" type="text" name="newsSearch" autofocus x-webkit-speech value={{ query }} />
+        <input class="search-bar" id="input-field" type="text" name="newsSearch" autofocus x-webkit-speech value="{{ query }}" />
     {% else %}
         <input class="search-bar" type="text" name="newsSearch" autofocus x-webkit-speech />
     {% endif %}

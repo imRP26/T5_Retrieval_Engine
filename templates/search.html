@@ -192,7 +192,7 @@
     <form method="POST" action="search">
     {% csrf_token %}
     {% if query %}
-        <input class="search-bar" id="input-field" type="text" name="search" autofocus x-webkit-speech value={{ query }} />
+        <input class="search-bar" id="input-field" type="text" name="search" autofocus x-webkit-speech value="{{ query }}" />
     {% else %}
         <input class="search-bar" type="text" name="search" autofocus x-webkit-speech />
     {% endif %}
