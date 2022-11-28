@@ -43,7 +43,8 @@ def search(request):
                 final_result.append((result_title, result_url, result_desc, result_cookies))
         final_result = sorted(final_result, key=lambda x: x[-1])
         context = {
-            'final_result': final_result
+            'final_result': final_result,
+            'query': search
         }
         return render(request, 'search.html', context)
     else:
@@ -53,7 +54,7 @@ def search(request):
 def imageSearch(request):
     if request.method == 'POST':
         search = request.POST['imageSearch']
-        max_pages = 5
+        max_pages = 8
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',}
         params = {
             "q": search,
@@ -155,7 +156,8 @@ def newsSearch(request):
             summary = ''.join(finalSummary)
             final_result.append((newsTitle, newsURL, summary))
         context = {
-            'final_result': final_result
+            'final_result': final_result, 
+            'query': search
         }
         return render(request, 'newsSearch.html', context)
     else:
@@ -182,22 +184,39 @@ def videoSearch(request):
             link = result.select_one('.mc_vtvc_link')['href']
             if link[0] == '/':
                 link = 'https://www.bing.com' + link
-            views = result.select_one('.mc_vtvc_meta_row:nth-child(1) span:nth-child(1)').text
-            date = ''
-            if result.select_one('.mc_vtvc_meta_row:nth-child(1) span+ span') == None:
-                date = '1st January, 2000'
-            else:
+            views = 'ago'
+            if result.select_one('.mc_vtvc_meta_row:nth-child(1) span:nth-child(1)') != None:
+                views = result.select_one('.mc_vtvc_meta_row:nth-child(1) span:nth-child(1)').text
+            date = '1st January, 2010'
+            if result.select_one('.mc_vtvc_meta_row:nth-child(1) span+ span') != None:
                 date = result.select_one('.mc_vtvc_meta_row:nth-child(1) span+ span').text
-            video_platform = result.select_one('.mc_vtvc_meta_row+ .mc_vtvc_meta_row span:nth-child(1)').text
+            video_platform = 'Bing'
+            if result.select_one('.mc_vtvc_meta_row+ .mc_vtvc_meta_row span:nth-child(1)') != None:
+                video_platform = result.select_one('.mc_vtvc_meta_row+ .mc_vtvc_meta_row span:nth-child(1)').text
             channel_name = ''
             if result.select_one('.mc_vtvc_meta_row_channel') == None:
-                channel_name = 'Youtuber'
+                channel_name = 'Unknown'
             else:
                 channel_name = result.select_one('.mc_vtvc_meta_row_channel').text
-            final_result.append((title, link, channel_name, video_platform, date, views))
-        final_result = sorted(final_result, key=lambda x: x[-2])
+            viewsNumerical = 0
+            if 'B' in views:
+                viewsNumerical = float(views[:-7]) * 1000000000
+            elif 'M' in views:
+                viewsNumerical = float(views[:-7]) * 1000000
+            elif 'K' in views:
+                viewsNumerical = float(views[:-7]) * 1000
+            elif 'ago' in views or not views.isdigit():
+                viewsNumerical = 0
+            else:
+                viewsNumerical = float(views[:-6])
+            viewsNumerical = int(viewsNumerical)
+            if views == 'ago':
+                views = ''
+            final_result.append((title, link, channel_name, video_platform, date, views, viewsNumerical))
+        final_result = sorted(final_result, key=lambda x: x[-1], reverse=True)
         context = {
-            'final_result': final_result
+            'final_result': final_result,
+            'query': search
         }
         return render(request, 'videoSearch.html', context)
     else:
