@@ -32,12 +32,11 @@ def search(request):
         ssl._create_default_https_context = context
         for page in range(0,max_pages):
             url = 'https://www.ask.com/web?q=' + search + "&qo=pagination&page=" + str(page)
-            headers = requests.utils.default_headers()
-            headers.update( {
+            headers = {
                 'User-Agent': 
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
-            })
-            res = requests.get(url, headers=headers)
+            }
+            res = requests.get(url, allow_redirects=True, headers=headers)
             soup = bs(res.text, 'lxml')
             result_listings = soup.find_all('div', {'class': 'PartialSearchResults-item'})
             uniqueURLs = set()
