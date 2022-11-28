@@ -195,6 +195,7 @@ color: #000000;
     <form method="POST" action="imageSearch">
             {% csrf_token %}
     {% if query %}
+        <input class="search-bar" id="input-field" type="text" name="imageSearch" autofocus x-webkit-speech value="{{ query }}" />
         <input class="search-bar" id="input-field" type="text" name="imageSearch" autofocus x-webkit-speech value={{ query }} />
     {% else %}
         <input class="search-bar" type="text" name="imageSearch" autofocus x-webkit-speech />
@@ -236,8 +237,9 @@ color: #000000;
         </nav>
         </footer>
         </div>
-        <script type="text/javascript">
-            let input = document.getElementById("input-field");
-            let length = input.value.length;
-            input.setSelectionRange(length, length);   
-        </script>
+
+    <script type="text/javascript">
+        let input = document.getElementById("input-field");
+        let length = input.value.length;
+        input.setSelectionRange(length, length);   
+    </script>
