@@ -301,11 +301,11 @@ def videoSearch(request):
 
 
 def movieSearch(request):
-    genres = ['Comedy', 'Sci-fi', 'Horror', 'Romance', 'Action', 'Thirller', 'Drama', 'Mystery', 
+    genres = ['Comedy', 'Sci-fi', 'Horror', 'Romance', 'Action', 'Thriller', 'Drama', 'Mystery', 
         'Crime', 'Animation', 'Adventure', 'Fantasy', 'Superhero']
     if request.method == 'POST':
         """
-        comedy, sci-fi, horror, romance, action, thirller, drama, mystery, 
+        comedy, sci-fi, horror, romance, action, thriller, drama, mystery, 
         crime, animation, adventure, fantasy, superhero
         """
         search = request.POST['genres']
