@@ -4,9 +4,9 @@ Retrieval / Search Engine code for Team5, SSD for Monsoon 2022!!
 
 ### Team members 
 - Rahul Padhy (2022201003)
-- Ujjwal Prakash (20222020)
-- Gunank Singh Jakhar (20222010)
-- Venkata G Srikiran Pulipaka ()
+- Ujjwal Prakash (2022202009)
+- Gunank Singh Jakhar (2022201057)
+- Venkata G Srikiran Pulipaka (2022202004)
 
 
 #### Heroku app -> Link to be updated, stay tuned!!
