@@ -14,7 +14,39 @@ import ssl
 from string import punctuation
 from time import sleep
 from warnings import warn
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk.corpus import stopwords
+from sklearn.metrics.pairwise import cosine_similarity
 
+stopWords = list(set(stopwords.words('english')))
+
+def cos_similarity(search_query_weights, tfidf_weights_matrix):
+	
+	cosine_distance = cosine_similarity(search_query_weights, tfidf_weights_matrix)
+	similarity_list = cosine_distance[0]
+  
+	return similarity_list
+
+def most_similar(similarity_list, ndocs=1):
+	
+	most_similar= []
+  
+	while ndocs > 0:
+		tmp_index = np.argmax(similarity_list)
+		most_similar.append(tmp_index)
+		similarity_list[tmp_index] = 0
+		ndocs -= 1
+
+	return most_similar
+
+def tf_idf(search_keys, docs):
+  
+	tfidf_vectorizer = TfidfVectorizer(stop_words=stopWords)
+	tfidf_weights_matrix = tfidf_vectorizer.fit_transform(docs)
+	search_query_weights = tfidf_vectorizer.transform(search_keys)
+	
+	return search_query_weights, tfidf_weights_matrix
 
 # Create your views here.
 def index(request):
@@ -25,8 +57,9 @@ def index(request):
 def search(request):
     if request.method == 'POST':
         search = request.POST['search']
-        max_pages = 5
+        max_pages = 3
         final_result = []
+        docs = []
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.load_verify_locations(certifi.where())
         ssl._create_default_https_context = context
@@ -39,18 +72,43 @@ def search(request):
             res = requests.get(url, allow_redirects=True, headers=headers)
             soup = bs(res.text, 'lxml')
             result_listings = soup.find_all('div', {'class': 'PartialSearchResults-item'})
-            uniqueURLs = set()
+            # uniqueURLs = set()
             for result in result_listings:
                 result_title = result.find(class_='PartialSearchResults-item-title').text
                 result_url = result.find('a').get('href')
                 result_desc = result.find(class_='PartialSearchResults-item-abstract').text
-                session = requests.Session()
-                response = session.get(result_url)
-                result_cookies = len(session.cookies.get_dict())
-                final_result.append((result_title, result_url, result_desc, result_cookies))
-        final_result = sorted(final_result, key=lambda x: x[-1])
+                # session = requests.Session()
+                # response = session.get(result_url)
+                # result_cookies = len(session.cookies.get_dict())
+                final_result.append((result_title, result_url, result_desc))
+
+                if(result_url is not None):
+                    res = requests.get(result_url, allow_redirects=True, headers=headers)
+
+                    if(res is not None):
+                        soup = bs(res.text, 'lxml')
+                        texts = soup.find_all(text=True)
+                        doc = u" ".join(text.strip() for text in texts if text.parent.name not in ['style', 'script', 'head', 'title', 'meta', '[document]'])
+                        docs.append(doc)
+
+        search_query_weights, tfidf_weights_matrix = tf_idf(search.split(), docs)
+        similarity_list = cos_similarity(search_query_weights, tfidf_weights_matrix)
+        ranks = most_similar(similarity_list, len(docs))
+
+        toRender = {}
+        j = 0
+        for i in ranks:
+            if(ranks[i] not in toRender):
+                toRender[ranks[i]] = []
+                toRender[ranks[i]].append(final_result[j])
+            else:
+                toRender[ranks[i]].append(final_result[j])
+            j += 1
+
+        final_list_toRender = [j for i in toRender.values() for j in i]
+
         context = {
-            'final_result': final_result,
+            'final_result': final_list_toRender,
             'query': search
         }
         return render(request, 'search.html', context)
@@ -87,49 +145,38 @@ def imageSearch(request):
 
 
 def newsSearch(request):
-    countries = ["Australia", "Botswana", "Canada", "Ethiopia", "Ghana", "India", "Indonesia", "Ireland", "Israel", "Kenya", "Latvia", "Malaysia", "Namibia", 
-    "New Zealand", "Nigeria", "Pakistan", "Philippines", "Singapore", "South Africa", "Tanzania", "Uganda", "United Kingdom", "United States", "Zimbabwe", 
-    "Czech Republic", "Germany", "Austria", 'Switzerland', 'Argentina', 'Chile', 'Colombia', 'Cuba', 'Mexico', 'Peru', 'Venezuela', 'Belgium ', 'France', 'Morocco', 'Senegal', 'Italy',
-    'Lithuania', 'Hungary', 'Netherlands', 'Norway', 'Poland', 'Brazil', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Sweden', 'Vietnam', 'Turkey', 'Greece',
-    'Bulgaria', 'Russia', 'Ukraine ', 'Serbia', 'United Arab Emirates', 'Saudi Arabia', 'Lebanon', 'Egypt', 'Bangladesh', 'Thailand', 'China', 'Taiwan', 'Hong Kong', 
-    'Japan', 'Republic of Korea']
-    topics = ["Business", "Technology", "Entertainment", "Sports", "Science", "Health"]
-    selectParams = {
-        'countries': countries,
-        'topics': topics
-    }
     if request.method == 'POST':
         client = gnewsclient.NewsClient()
-        newsLocation = request.POST['country']
-        newsTopic = request.POST['topics']
-        print(newsLocation)
-        print(newsTopic)
-        search = {
-            'country': newsLocation,
-            'topic': newsTopic
-        }
-        # """
-        # Possible values of news location :-
-        # 'Australia', 'Botswana', 'Canada ', 'Ethiopia', 'Ghana', 'India ', 'Indonesia', 
-        # 'Ireland', 'Israel ', 'Kenya', 'Latvia', 'Malaysia', 'Namibia', 'New Zealand', 
-        # 'Nigeria', 'Pakistan', 'Philippines', 'Singapore', 'South Africa', 'Tanzania', 
-        # 'Uganda', 'United Kingdom', 'United States', 'Zimbabwe', 'Czech Republic', 
-        # 'Germany', 'Austria', 'Switzerland', 'Argentina', 'Chile', 'Colombia', 'Cuba', 
-        # 'Mexico', 'Peru', 'Venezuela', 'Belgium ', 'France', 'Morocco', 'Senegal', 'Italy', 
-        # 'Lithuania', 'Hungary', 'Netherlands', 'Norway', 'Poland', 'Brazil', 'Portugal', 
-        # 'Romania', 'Slovakia', 'Slovenia', 'Sweden', 'Vietnam', 'Turkey', 'Greece', 
-        # 'Bulgaria', 'Russia', 'Ukraine ', 'Serbia', 'United Arab Emirates', 'Saudi Arabia', 
-        # 'Lebanon', 'Egypt', 'Bangladesh', 'Thailand', 'China', 'Taiwan', 'Hong Kong', 
-        # 'Japan', 'Republic of Korea'
+        search = request.POST['newsSearch']
+        queryList = search.split()
+        """
+        Possible values of news location :-
+        'Australia', 'Botswana', 'Canada ', 'Ethiopia', 'Ghana', 'India ', 'Indonesia', 
+        'Ireland', 'Israel ', 'Kenya', 'Latvia', 'Malaysia', 'Namibia', 'New Zealand', 
+        'Nigeria', 'Pakistan', 'Philippines', 'Singapore', 'South Africa', 'Tanzania', 
+        'Uganda', 'United Kingdom', 'United States', 'Zimbabwe', 'Czech Republic', 
+        'Germany', 'Austria', 'Switzerland', 'Argentina', 'Chile', 'Colombia', 'Cuba', 
+        'Mexico', 'Peru', 'Venezuela', 'Belgium ', 'France', 'Morocco', 'Senegal', 'Italy', 
+        'Lithuania', 'Hungary', 'Netherlands', 'Norway', 'Poland', 'Brazil', 'Portugal', 
+        'Romania', 'Slovakia', 'Slovenia', 'Sweden', 'Vietnam', 'Turkey', 'Greece', 
+        'Bulgaria', 'Russia', 'Ukraine ', 'Serbia', 'United Arab Emirates', 'Saudi Arabia', 
+        'Lebanon', 'Egypt', 'Bangladesh', 'Thailand', 'China', 'Taiwan', 'Hong Kong', 
+        'Japan', 'Republic of Korea'
         
-        # Possible values of news Topics :- 
-        # Business, Technology, Entertainment, Sports, Science, Health
-        # """
-
+        Possible values of news Topics :- 
+        Business, Technology, Entertainment, Sports, Science, Health
+        """
+        newsTopic = queryList[-1]
+        queryList.pop()
+        newsLocation = ""
+        for location in queryList:
+            newsLocation += location
+            newsLocation += ' '
+        newsLocation = newsLocation.rstrip(newsLocation[-1])
         client.location = newsLocation.lower()
         client.topic = newsTopic.lower()
         client.language = 'english'
-        client.max_results = 20
+        client.max_results = 25
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
         config = Config()
         config.browser_user_agent = userAgent
@@ -174,16 +221,12 @@ def newsSearch(request):
             summary = ''.join(finalSummary)
             final_result.append((newsTitle, newsURL, summary))
         context = {
-            'final_result': final_result,
-            'query': search,
-            'selectParams': selectParams
+            'final_result': final_result, 
+            'query': search
         }
         return render(request, 'newsSearch.html', context)
     else:
-        context = {
-            'selectParams': selectParams
-        }
-        return render(request, 'newsSearch.html', context)
+        return render(request, 'newsSearch.html')
 
 
 def videoSearch(request):
@@ -246,19 +289,17 @@ def videoSearch(request):
 
 
 def movieSearch(request):
-    genres = ['Comedy', 'Sci-fi', 'Horror', 'Romance', 'Action', 'Thirller', 'Drama', 'Mystery', 
-        'Crime', 'Animation', 'Adventure', 'Fantasy', 'Superhero']
     if request.method == 'POST':
         """
         comedy, sci-fi, horror, romance, action, thirller, drama, mystery, 
         crime, animation, adventure, fantasy, superhero
         """
-        search = request.POST['genres']
+        search = request.POST['movieSearch']
         pages = np.arange(1, 100, 50)
         headers = {'Accept-Language': 'en-US,en;q=0.8'}
         final_result = []
         for page in pages:
-            url = 'https://www.imdb.com/search/title?genres=' + search.lower() + '&start=' + str(page) + '&explore=title_type,genres&ref_=adv_prv'
+            url = 'https://www.imdb.com/search/title?genres=' + search + '&start=' + str(page) + '&explore=title_type,genres&ref_=adv_prv'
             response = requests.get(url, headers=headers)
             #sleep(randint(8, 15))
             if response.status_code != 200:
@@ -290,15 +331,11 @@ def movieSearch(request):
                     rankScore = imdb_rating + metascore
                     final_result.append((title, link, year, rating, genre, runtime, rankScore))
         final_result = sorted(final_result, key=lambda x: x[-1], reverse=True)
-        # print (len(final_result))
+        print (len(final_result))
         context = {
             'final_result': final_result,
-            'query': search,
-            'genres': genres
+            'query': search
         }
         return render(request, 'movieSearch.html', context)
     else:
-        context = {
-            'genres': genres
-        }
-        return render(request, 'movieSearch.html', context)
+        return render(request, 'movieSearch.html')
