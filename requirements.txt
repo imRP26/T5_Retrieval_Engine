@@ -64,7 +64,6 @@ jsonify==0.5
 kiwisolver==1.4.4
 langcodes==3.3.0
 Levenshtein==0.20.8
-libxml2-python==2.10.3
 lxml==4.9.1
 MarkupSafe==2.1.1
 matplotlib==3.6.2
