@@ -157,5 +157,4 @@ websockets==10.4
 Werkzeug==2.2.2
 whitenoise==6.2.0
 wrapt==1.14.1
-wsproto==1.2.0
 zipp==3.10.0
