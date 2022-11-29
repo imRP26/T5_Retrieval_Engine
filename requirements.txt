@@ -83,11 +83,9 @@ platformdirs==2.5.2
 preshed==3.0.8
 psutil==5.9.3
 psycopg2-binary==2.9.4
-pycairo==1.21.0
 pydantic==1.10.2
 pyee==9.0.4
 Pygments==2.13.0
-PyGObject==3.42.2
 pyparsing==3.0.9
 pyppeteer==1.0.2
 PyQt3D==5.15.5
