@@ -193,15 +193,19 @@
     <div class="logo">
     <img src="https://upload.wikimedia.org/wikipedia/en/e/e1/International_Institute_of_Information_Technology%2C_Hyderabad_logo.png" />
     </div>
+    <br />
+    <br />
     <form method="POST" action="movieSearch">
             {% csrf_token %}
-    {% if query %}
-        <input class="search-bar" id="input-field" type="text" name="movieSearch" autofocus x-webkit-speech value="{{ query }}" />
-    {% else %}
-        <input class="search-bar" type="text" name="movieSearch" autofocus x-webkit-speech />
-    {% endif %}
+        <label for="genres">Genres:</label>
+        <select name="genres" id="genres">
+            {% for genre in genres %}
+                <option value="{{ genre }}" {% if query and query == genre %}selected{% endif %}>{{ genre }}</option>
+            {% endfor %}
+        </select>
     <div class="search-nav">
     <div class="search-button">
+        <br />
     <a href="#"><button type="submit">T5 Movie Search</button></a>
     </form>
     <!--
@@ -237,8 +241,3 @@
         </nav>
         </footer>
         </div>
-        <script type="text/javascript">
-            let input = document.getElementById("input-field");
-            let length = input.value.length;
-            input.setSelectionRange(length, length);   
-        </script>

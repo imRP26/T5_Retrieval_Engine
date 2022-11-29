@@ -193,16 +193,26 @@
     <div class="logo">
     <img src="https://upload.wikimedia.org/wikipedia/en/e/e1/International_Institute_of_Information_Technology%2C_Hyderabad_logo.png" />
     </div>
+    <br />
+    <br />
     <form method="POST" action="newsSearch">
-            {% csrf_token %}
-    {% if query %}
-        <input class="search-bar" id="input-field" type="text" name="newsSearch" autofocus x-webkit-speech value="{{ query }}" />
-    {% else %}
-        <input class="search-bar" type="text" name="newsSearch" autofocus x-webkit-speech />
-    {% endif %}
-    <div class="search-nav">
-    <div class="search-button">
-    <a href="#"><button type="submit">T5 News</button></a>
+        {% csrf_token %}
+        <label for="country">Country:</label>
+        <select name="country" id="country">
+            {% for country in selectParams.countries %}
+                <option value="{{ country }}" {% if query and query.country == country %}selected{% endif %}>{{ country }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="topics">Topics:</label>
+        <select name="topics" id="topics">
+            {% for topic in selectParams.topics %}
+                <option value="{{ topic }}" {% if query and query.topic == topic %}selected{% endif %}>{{ topic }}</option>
+            {% endfor %}
+        </select>
+        <br />
+        <br />
+        <a href="#"><button type="submit">T5 News</button></a>
     </form>
     <!--
     <a href="#"><button>I'm Feeling Lucky</button></a>
@@ -234,8 +244,3 @@
         </nav>
         </footer>
         </div>
-        <script type="text/javascript">
-            let input = document.getElementById("input-field");
-            let length = input.value.length;
-            input.setSelectionRange(length, length);   
-        </script>
