@@ -130,7 +130,7 @@ def imageSearch(request):
         images = []
         for page in range(0, max_pages):
             params['ijn'] = str(page)
-            html = requests.get("https://www.google.com/search", params=params, headers=headers, timeout=30)
+            html = requests.get("https://www.google.com/search", params=params, headers=headers, timeout=60)
             soup = bs(html.text, "lxml")
             for img in soup.select("img"):
                 images.append(img['src'])
@@ -144,13 +144,8 @@ def imageSearch(request):
 
 
 def newsSearch(request):
-    countries = ["Australia", "Botswana", "Canada", "Ethiopia", "Ghana", "India", "Indonesia", "Ireland", "Israel", "Kenya", "Latvia", "Malaysia", "Namibia", 
-    "New Zealand", "Nigeria", "Pakistan", "Philippines", "Singapore", "South Africa", "Tanzania", "Uganda", "United Kingdom", "United States", "Zimbabwe", 
-    "Czech Republic", "Germany", "Austria", 'Switzerland', 'Argentina', 'Chile', 'Colombia', 'Cuba', 'Mexico', 'Peru', 'Venezuela', 'Belgium ', 'France', 'Morocco', 'Senegal', 'Italy',
-    'Lithuania', 'Hungary', 'Netherlands', 'Norway', 'Poland', 'Brazil', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Sweden', 'Vietnam', 'Turkey', 'Greece',
-    'Bulgaria', 'Russia', 'Ukraine ', 'Serbia', 'United Arab Emirates', 'Saudi Arabia', 'Lebanon', 'Egypt', 'Bangladesh', 'Thailand', 'China', 'Taiwan', 'Hong Kong', 
-    'Japan', 'Republic of Korea']
-    topics = ["Business", "Technology", "Entertainment", "Sports", "Science", "Health"]
+    countries = ['Argentina', 'Australia', 'Austria', 'Bangladesh', 'Belgium ', 'Botswana', 'Brazil', 'Bulgaria', 'Canada', 'Chile', 'China', 'Colombia', 'Cuba', 'Czech Republic', 'Egypt', 'Ethiopia', 'France', 'Germany', 'Ghana', 'Greece', 'Hong Kong', 'Hungary', 'India', 'Indonesia', 'Ireland', 'Israel', 'Italy', 'Japan', 'Kenya', 'Latvia', 'Lebanon', 'Lithuania', 'Malaysia', 'Mexico', 'Morocco', 'Namibia', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway', 'Pakistan', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Republic of Korea', 'Romania', 'Russia', 'Saudi Arabia', 'Senegal', 'Serbia', 'Singapore', 'Slovakia', 'Slovenia', 'South Africa', 'Sweden', 'Switzerland', 'Taiwan', 'Tanzania', 'Thailand', 'Turkey', 'Uganda', 'Ukraine ', 'United Arab Emirates', 'United Kingdom', 'United States', 'Venezuela', 'Vietnam', 'Zimbabwe']
+    topics = ['Business', 'Entertainment', 'Health', 'Science', 'Sports', 'Technology']
     selectParams = {
         'countries': countries,
         'topics': topics
@@ -188,7 +183,7 @@ def newsSearch(request):
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
         config = Config()
         config.browser_user_agent = userAgent
-        config.request_timeout = 30
+        config.request_timeout = 60
         newsList = client.get_news()
         final_result = []
         for news in newsList:
@@ -301,8 +296,7 @@ def videoSearch(request):
 
 
 def movieSearch(request):
-    genres = ['Comedy', 'Sci-fi', 'Horror', 'Romance', 'Action', 'Thriller', 'Drama', 'Mystery', 
-        'Crime', 'Animation', 'Adventure', 'Fantasy', 'Superhero']
+    genres = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-fi', 'Superhero', 'Thriller']
     if request.method == 'POST':
         """
         comedy, sci-fi, horror, romance, action, thriller, drama, mystery, 
